@@ -2,6 +2,12 @@
 
 This repo is based on the [GDMC example mod](https://github.com/Lasbleic/gdmc_java_mod) which is based on the Forge MDK.
 
+## What it's all about
+
+(Disclaimer: This mod is in early development)
+
+This mod opens a HTTP interface so that other programs (on the same machine) can read and modify the world. It is meant as a tool to be used for the [Generative Design in Minecraft Competition](http://gendesignmc.engineering.nyu.edu/), but is not approved as a submission method, so right now it is only useful to prototype ideas!
+
 When you open a Minecraft world, this mod opens a HTTP Server on localhost:9000. This HTTP Interface currently supports two endpoints:
 
 ## Features / HTTP Endpoints
@@ -14,16 +20,33 @@ The request body contains one or multiple commands on separate lines without the
 
 ```
 say start
-
 tp @p 0 70 0
 setblock 0 69 0 stone
-
 fill -8 68 -8 8 68 8 oak_planks replace
-
 say end
 ```
 
-[Minecraft commands documentation](https://minecraft.gamepedia.com/Commands#List_and_summary_of_commands)
+These commands are then executed line by line. The response body of the request contains the return values for each command in separate lines. A return value can either be an integer or an error message. For example the request above might return:
+
+```
+1
+1
+1
+289
+1
+```
+
+And on a subsequent call, two of the commands will fail, so the return text will be:
+
+```
+1
+1
+Could not set the block
+No blocks were filled
+1
+```
+
+For commands and their return values consult the [Minecraft commands documentation](https://minecraft.gamepedia.com/Commands#List_and_summary_of_commands).
 
 ### Get chunk data
 
@@ -35,9 +58,9 @@ for example
 
 This returns the chunks as an NBT data structure. [The NBT format](https://minecraft.gamepedia.com/NBT_format) is the save format Minecraft uses for most things. There are open source NBT parsers available for different languages including Python and C#.
 
-If you set the 'Accept' header of your request to "application/octet-stream" you will get raw binary data. This is what you probably want.
+If you set the 'Accept' header of your request to "application/octet-stream" you will get raw binary data. This is what you probably want if you are using an NBT parsing library.
 
-If the Accept header is anything else, you will get a json-like human readable representation, which looks like this:
+If the Accept header is anything else, you will get a human readable representation, which looks like this:
 
 ```
 {Chunks:[{Level:{Status:"full",zPos:0,LastUpdate:6560L,Biomes:[I;3,3,3,3,7,7 ...
@@ -53,11 +76,13 @@ Get the [Forge Mod Launcher](https://files.minecraftforge.net/) (1.16.3-34.1.0 -
 
 Open your Minecraft Launcher, the Forge Installation should have appeared there.
 
-Open the Forge Installation and click the "Mods" button and then the "Open mods folder" button.
+Open the Forge Installation and click the "Mods" button and then the "Open mods folder" button (You can skip this step by just navigating to %APPDATA%/.minecraft/mods).
 
-Download the mod jar from [here](!TODO!) and place it in this folder.
+Download the jar file from [here](https://github.com/nilsgawlik/gdmc_http_interface/releases/tag/v0.1.0alpha) and place it in the mod folder.
 
+Restart Minecraft and launch the Forge Installation again. The mod should now appear in the mod list under "Mods".
 
+When you open a world the HTTP Server will be started automatically
 
 ## Running this mod from source
 
@@ -84,4 +109,4 @@ I personnaly would go for IntelliJ.
 
 - For IntelliJ, run the genIntellijRuns gradle task (gradlew genIntellijRuns). This will generate the Run Configurations and download any required assets for the game to run. After this has finished, reload the project from disk and click on "Add configuration". Under the "Application" tab, you have a runClient configuration. Select it, and edit your Configurations to fix the “module not specified” error by changing selecting your “main” module. You can now run Minecraft, with the mod loaded in. Make sure to open a Minecraft world, before testing the mod.
 
-I recommend using Postman or a similar application to test out the http interface. An Python example of how to use the interface can be found here: !TODO!
+I recommend using Postman or a similar application to test out the http interface. An Python example of how to use the interface can be found [here](https://github.com/nilsgawlik/gdmc_http_client_python)
