@@ -45,9 +45,19 @@ If the Accept header is anything else, you will get a json-like human readable r
 
 This human readable representation of NBT is defined by Minecraft and used in different places, for example when using NBT data in commands. 
 
-## Installing this mod
+## Installing this mod with the Forge Mod Launcher
 
-!TODO!
+You need to own a copy of Minecraft and have it installed on your machine. 
+
+Get the [Forge Mod Launcher](https://files.minecraftforge.net/) (1.16.3-34.1.0 - Installer) and install it.
+
+Open your Minecraft Launcher, the Forge Installation should have appeared there.
+
+Open the Forge Installation and click the "Mods" button and then the "Open mods folder" button.
+
+Download the mod jar from [here](!TODO!) and place it in this folder.
+
+
 
 ## Running this mod from source
 
