@@ -1,20 +1,61 @@
-# Template mod for GDMC - 1.15.2
+# Minecraft HTTP Interface Mod (Minecraft 1.16.3)
 
-This repo is just the Forge MDK with a different example mod.
-This template mod register, parse and execute the command "/buildsettlement x1 y1 z1 x2 y2 z2", printing a "Hello World!" plus coordinates.
-It also provides some basic functions considered useful to implement a village generator.
+This repo is based on the [GDMC example mod](https://github.com/Lasbleic/gdmc_java_mod) which is based on the Forge MDK.
 
----
+When you open a Minecraft world, this mod opens a HTTP Server on localhost:9000. This HTTP Interface currently supports two endpoints:
 
-## Setup the dev environment
+## Features / HTTP Endpoints
 
-These instructions are adapted from the Forge installation guide : [Forge Setup](https://mcforge.readthedocs.io/en/1.14.x/gettingstarted/#getting-started-with-forge)
+### Send commands to the server
+
+`http://localhost:9000/command`
+
+The request body contains one or multiple commands on separate lines without the slashes, for example:
+
+```
+say start
+
+tp @p 0 70 0
+setblock 0 69 0 stone
+
+fill -8 68 -8 8 68 8 oak_planks replace
+
+say end
+```
+
+[Minecraft commands documentation](https://minecraft.gamepedia.com/Commands#List_and_summary_of_commands)
+
+### Get chunk data
+
+`http://localhost:9000/chunks?x=<int>&z=<int>&dx=<int>&dz=<int>`
+
+for example
+
+`http://localhost:9000/chunks?x=0&z=0&dx=2&dz=2`
+
+This returns the chunks as an NBT data structure. [The NBT format](https://minecraft.gamepedia.com/NBT_format) is the save format Minecraft uses for most things. There are open source NBT parsers available for different languages including Python and C#.
+
+If you set the 'Accept' header of your request to "application/octet-stream" you will get raw binary data. This is what you probably want.
+
+If the Accept header is anything else, you will get a json-like human readable representation, which looks like this:
+
+```
+{Chunks:[{Level:{Status:"full",zPos:0,LastUpdate:6560L,Biomes:[I;3,3,3,3,7,7 ...
+```
+
+This human readable representation of NBT is defined by Minecraft and used in different places, for example when using NBT data in commands. 
+
+## Installing this mod
+
+!TODO!
+
+## Running this mod from source
+
+These instructions are adapted from the [Forge installation guide](https://mcforge.readthedocs.io/en/1.14.x/gettingstarted/#getting-started-with-forge)
 
 #### Get the sources
 
-On GitHub, click on the green "Use Template" button to create a new repository, and clone it.
-
-Otherwise, you can also directly download the code ("Code" button, then download zip), and extract it to the folder you choose.
+Clone or fork this repository.
 
 #### Choose your IDE:
 
@@ -31,32 +72,6 @@ I personnaly would go for IntelliJ.
 
 - For Eclipse, run the genEclipseRuns gradle task (gradlew genEclipseRuns). This will generate the Launch Configurations and download any required assets for the game to run. After this has finished refresh your project.
 
-- For IntelliJ, run the genIntellijRuns gradle task (gradlew genIntellijRuns). This will generate the Run Configurations and download any required assets for the game to run. After this has finished, reload the project from disk and click on "Add configuration". Under the "Application" tab, you have a runClient configuration. Select it, and edit your Configurations to fix the “module not specified” error by changing selecting your “main” module. You can now run Minecraft, with the mod loaded in, and test the command "buildSettlement x1 y1 z1 x2 y2 z2".
+- For IntelliJ, run the genIntellijRuns gradle task (gradlew genIntellijRuns). This will generate the Run Configurations and download any required assets for the game to run. After this has finished, reload the project from disk and click on "Add configuration". Under the "Application" tab, you have a runClient configuration. Select it, and edit your Configurations to fix the “module not specified” error by changing selecting your “main” module. You can now run Minecraft, with the mod loaded in. Make sure to open a Minecraft world, before testing the mod.
 
----
-
-
-## Start creating your mod
-
-#### Edit the mod packaging
-
-Do not hesitate to refactor all the packaging structure, made here for the example, and to rename the mod's main class ```GdmcExample```
-
-> **Important :** Please change the MOD_ID variable, that should match the string in the ```@Mod``` annotation above the ```GdmcExample``` class declaration, and also the modid in mods.toml ! Otherwise, your mod might collide with other.
-
-#### Edit the mods.toml file
-
-This file contains all the metadata of your mod, like its description, its name, its version, etc... Feel free to modify all of this.
-
-#### Start coding
-
-Once you are ready to code, just code, everything is made for you!
-Delete the 'TODO' in the```buildSettlement()``` method, in the class ```BuildSettlementCommand``` and start developping your algorithm.
-Don't hesitate to take a look at our [wiki](https://github.com/Lasbleic/gdmc_java_mod/wiki/)!
-
-
-
-### Happy GDMC Competition!
-
-
-
+I recommend using Postman or a similar application to test out the http interface. An Python example of how to use the interface can be found here: !TODO!
