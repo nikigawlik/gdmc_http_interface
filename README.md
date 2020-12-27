@@ -6,7 +6,7 @@ This repo is based on the [GDMC example mod](https://github.com/Lasbleic/gdmc_ja
 
 (Disclaimer: This mod is in early development)
 
-This mod opens a HTTP interface so that other programs (on the same machine) can read and modify the world. It is meant as a tool to be used for the [Generative Design in Minecraft Competition](http://gendesignmc.engineering.nyu.edu/), but is not approved as a submission method, so right now it is only useful for prototyping ideas!
+This mod opens an HTTP interface so that other programs (on the same machine) can read and modify the world. It is meant as a tool to be used for the [Generative Design in Minecraft Competition](http://gendesignmc.engineering.nyu.edu/), but is not approved as a submission method, so right now it is only useful for prototyping ideas!
 
 When you open a Minecraft world, this mod opens a HTTP Server on localhost:9000. This HTTP Interface currently supports two endpoints:
 
@@ -14,7 +14,14 @@ When you open a Minecraft world, this mod opens a HTTP Server on localhost:9000.
 
 ### Send commands to the server
 
-`http://localhost:9000/command`
+`POST http://localhost:9000/command`
+
+request body: 
+```
+<command>
+<command>
+...
+```
 
 The request body contains one or multiple commands on separate lines without the slashes, for example:
 
@@ -50,11 +57,11 @@ For commands and their return values consult the [Minecraft commands documentati
 
 ### Get chunk data
 
-`http://localhost:9000/chunks?x=<int>&z=<int>&dx=<int>&dz=<int>`
+`GET http://localhost:9000/chunks?x=<int>&z=<int>&dx=<int>&dz=<int>`
 
 for example
 
-`http://localhost:9000/chunks?x=0&z=0&dx=2&dz=2`
+`GET http://localhost:9000/chunks?x=0&z=0&dx=2&dz=2`
 
 This returns the chunks as an NBT data structure. [The NBT format](https://minecraft.gamepedia.com/NBT_format) is the save format Minecraft uses for most things. There are open source NBT parsers available for different languages including Python and C#.
 
@@ -67,6 +74,31 @@ If the Accept header is anything else, you will get a human readable representat
 ```
 
 This human readable representation of NBT is defined by Minecraft and used in different places, for example when using NBT data in commands. 
+
+### Set a block
+
+`POST http://localhost:9000/setblock?x=<int>&y=<int>&z=<int>`
+
+request body: 
+
+`<block>`
+
+for example
+
+`POST http://localhost:9000/setblock?x=-354&y=67&z=1023`
+
+request body: 
+`minecraft:stone`
+
+Sets a block in the Minecraft world, similar to the /setblock command. 
+
+The x, y, z parameters specify the block location. 
+The request body specifies the block using Minecraft's <block> argument syntax, a more complicated example would be:
+
+`minecraft:furnace[facing=north]{BurnTime:200}`
+
+More info on the block state syntax can be found [on the Minecraft wiki](https://minecraft.gamepedia.com/Commands#.3Cblock.3E)
+
 
 ## Installing this mod with the Forge Mod Launcher
 
