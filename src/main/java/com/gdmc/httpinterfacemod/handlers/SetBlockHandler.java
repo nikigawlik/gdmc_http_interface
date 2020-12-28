@@ -91,7 +91,7 @@ public class SetBlockHandler extends HandlerBase {
     }
 
     private int setBlock(BlockPos pos, BlockStateInput state) throws CommandSyntaxException {
-        ServerWorld serverWorld = mcServer.getWorld(World.field_234918_g_);
+        ServerWorld serverWorld = mcServer.getWorld(World.OVERWORLD);
 
         assert serverWorld != null;
         TileEntity tileentity = serverWorld.getTileEntity(pos);

@@ -32,7 +32,7 @@ public class CommandExample<S> {
 
     private static int perform(CommandContext<CommandSource> commandSourceContext, BlockPos from, BlockPos to) {
 
-        ServerWorld world = commandSourceContext.getSource().getServer().getWorld(World.field_234918_g_);
+        ServerWorld world = commandSourceContext.getSource().getServer().getWorld(World.OVERWORLD);
         CommandSource source = commandSourceContext.getSource();
         int x1 = from.getX(), y1 = from.getY(), z1 = from.getZ();
         int x2 = to.getX(), y2 = to.getY(), z2 = to.getZ();
@@ -50,8 +50,8 @@ public class CommandExample<S> {
 
     private static int buildSettlement(CommandSource source, ServerWorld world, int x1, int y1, int z1, int x2, int y2, int z2) {
 
-        source.getEntity().sendMessage(new StringTextComponent("Hello World!"), Util.field_240973_b_);
-        source.getEntity().sendMessage(new StringTextComponent(String.format("You want to build a settlement from %d, %d, %d to %d, %d, %d,", x1, y1, z1, x2, y2, z2 )), Util.field_240973_b_);
+        source.getEntity().sendMessage(new StringTextComponent("Hello World!"), Util.DUMMY_UUID);
+        source.getEntity().sendMessage(new StringTextComponent(String.format("You want to build a settlement from %d, %d, %d to %d, %d, %d,", x1, y1, z1, x2, y2, z2 )), Util.DUMMY_UUID);
 
         // TODO: generate a settlement
 

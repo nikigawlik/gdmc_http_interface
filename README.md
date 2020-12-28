@@ -104,7 +104,7 @@ More info on the block state syntax can be found [on the Minecraft wiki](https:/
 
 You need to own a copy of Minecraft and have it installed on your machine. 
 
-Get the [Forge Mod Launcher](https://files.minecraftforge.net/) (1.16.3-34.1.0 - Installer) and install it.
+Get the [Forge Mod Launcher](https://files.minecraftforge.net/) (1.16.4-35.1.15 - Installer) and install it.
 
 Open your Minecraft Launcher, the Forge Installation should have appeared there.
 

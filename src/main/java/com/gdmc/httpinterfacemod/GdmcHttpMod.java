@@ -40,10 +40,10 @@ public class GdmcHttpMod
 
         try {
             GdmcHttpServer.startServer(minecraftServer);
-            minecraftServer.sendMessage(new StringTextComponent("GDMC Server started successfully."), Util.field_240973_b_);
+            minecraftServer.sendMessage(new StringTextComponent("GDMC Server started successfully."), Util.DUMMY_UUID);
         } catch (IOException e) {
             LOGGER.warn("Unable to start server!");
-            minecraftServer.sendMessage(new StringTextComponent("GDMC Server failed to start!"), Util.field_240973_b_);
+            minecraftServer.sendMessage(new StringTextComponent("GDMC Server failed to start!"), Util.DUMMY_UUID);
         }
     }
 

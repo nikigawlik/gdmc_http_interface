@@ -57,7 +57,7 @@ public class ChunkHandler extends HandlerBase {
         // construct response
         if(statusCode == 200) {
             if(method.equals("get")) {
-                ServerWorld world = mcServer.getWorld(World.field_234918_g_);
+                ServerWorld world = mcServer.getWorld(World.OVERWORLD);
                 assert world != null;
 
                 ListNBT chunkList = new ListNBT();
