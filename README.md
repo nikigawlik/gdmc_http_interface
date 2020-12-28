@@ -110,7 +110,7 @@ Open your Minecraft Launcher, the Forge Installation should have appeared there.
 
 Open the Forge Installation and click the "Mods" button and then the "Open mods folder" button (You can skip this step by just navigating to %APPDATA%/.minecraft/mods).
 
-Download the jar file from [here](https://github.com/nilsgawlik/gdmc_http_interface/releases/tag/v0.1.0alpha) and place it in the mod folder.
+Download the jar file from [here](https://github.com/nilsgawlik/gdmc_http_interface/releases/tag/v0.2.0alpha) and place it in the mod folder.
 
 Restart Minecraft and launch the Forge Installation again. The mod should now appear in the mod list under "Mods".
 
