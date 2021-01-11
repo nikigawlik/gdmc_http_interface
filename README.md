@@ -8,7 +8,7 @@ This repo is based on the [GDMC example mod](https://github.com/Lasbleic/gdmc_ja
 
 This mod opens an HTTP interface so that other programs (on the same machine) can read and modify the world. It is meant as a tool to be used for the [Generative Design in Minecraft Competition](http://gendesignmc.engineering.nyu.edu/), but is not approved as a submission method, so right now it is only useful for prototyping ideas!
 
-When you open a Minecraft world, this mod opens a HTTP Server on localhost:9000. This HTTP Interface currently supports two endpoints:
+When you open a Minecraft world, this mod opens a HTTP Server on localhost:9000. I recommend using Postman or a similar application to test out the http interface. A Python example of how to use the interface can be found [here](https://github.com/nilsgawlik/gdmc_http_client_python). This HTTP Interface currently implements these endpoints:
 
 ## Features / HTTP Endpoints
 
@@ -104,11 +104,11 @@ More info on the block state syntax can be found [on the Minecraft wiki](https:/
 
 You need to own a copy of Minecraft and have it installed on your machine. 
 
-Get the [Forge Mod Launcher](https://files.minecraftforge.net/) (1.16.4-35.1.15 - Installer) and install it.
+Get the [Forge Mod Launcher](https://files.minecraftforge.net/) (Download Recommended -> Installer) and install it (client install, but server should work, too). The latest version I tested is 1.16.4-35.1.15, but newer versions should work just fine.
 
 Open your Minecraft Launcher, the Forge Installation should have appeared there.
 
-Open the Forge Installation and click the "Mods" button and then the "Open mods folder" button (You can skip this step by just navigating to %APPDATA%/.minecraft/mods).
+Open your mod folder. To do this open the Forge Installation you just installed and click the "Mods" button and then the "Open mods folder" button (You can skip this step by just navigating to %APPDATA%/.minecraft/mods).
 
 Download the jar file from [here](https://github.com/nilsgawlik/gdmc_http_interface/releases/tag/v0.2.0alpha) and place it in the mod folder.
 
@@ -139,6 +139,4 @@ I personnaly would go for IntelliJ.
 
 - For Eclipse, run the genEclipseRuns gradle task (gradlew genEclipseRuns). This will generate the Launch Configurations and download any required assets for the game to run. After this has finished refresh your project.
 
-- For IntelliJ, run the genIntellijRuns gradle task (gradlew genIntellijRuns). This will generate the Run Configurations and download any required assets for the game to run. After this has finished, reload the project from disk and click on "Add configuration". Under the "Application" tab, you have a runClient configuration. Select it, and edit your Configurations to fix the “module not specified” error by changing selecting your “main” module. You can now run Minecraft, with the mod loaded in. Make sure to open a Minecraft world, before testing the mod.
-
-I recommend using Postman or a similar application to test out the http interface. An Python example of how to use the interface can be found [here](https://github.com/nilsgawlik/gdmc_http_client_python)
+- For IntelliJ, run the genIntellijRuns gradle task (gradlew genIntellijRuns). This will generate the Run Configurations and download any required assets for the game to run. After this has finished, reload the project from disk and click on "Add configuration". Under the "Application" tab, you have a runClient configuration. Select it, and edit your Configurations to fix the “module not specified” error by changing selecting your “main” module. You can now run Minecraft, with the mod loaded in. Make sure to open a Minecraft world before testing the mod.
