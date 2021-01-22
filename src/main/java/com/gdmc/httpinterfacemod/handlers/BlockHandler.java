@@ -5,6 +5,7 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
+import net.minecraft.block.BlockState;
 import net.minecraft.command.arguments.BlockStateArgument;
 import net.minecraft.command.arguments.BlockStateInput;
 import net.minecraft.inventory.IClearable;
@@ -20,10 +21,12 @@ import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public class SetBlockHandler extends HandlerBase {
+//new CachedBlockInfo(p_210438_0_.getSource().getWorld(), BlockPosArgument.getLoadedBlockPos(p_210438_0_, "pos"), true)
+
+public class BlockHandler extends HandlerBase {
     private static final SimpleCommandExceptionType FAILED_EXCEPTION = new SimpleCommandExceptionType(new TranslationTextComponent("commands.setblock.failed"));
 
-    public SetBlockHandler(MinecraftServer mcServer) {
+    public BlockHandler(MinecraftServer mcServer) {
         super(mcServer);
     }
 
@@ -47,38 +50,38 @@ public class SetBlockHandler extends HandlerBase {
                 .lines().collect(Collectors.joining());
 
         try {
-            x = Integer.parseInt(queryParams.get("x"));
-            y = Integer.parseInt(queryParams.get("y"));
-            z = Integer.parseInt(queryParams.get("z"));
+            x = Integer.parseInt(queryParams.getOrDefault("x", "0"));
+            y = Integer.parseInt(queryParams.getOrDefault("y", "0"));
+            z = Integer.parseInt(queryParams.getOrDefault("z", "0"));
         } catch (NumberFormatException e) {
             responseString = "Could not parse query parameter: " + e.getMessage();
             statusCode = 400;
         }
 
-        BlockStateInput bsi;
-        try {
-            bsi = BlockStateArgument.blockState().parse(new StringReader(blockID));
-
-            // construct response
-            if(statusCode == 200) {
+        if(statusCode == 200) {
+            try {
+                // construct response
                 if(method.equals("post")) {
+                    BlockStateInput bsi = BlockStateArgument.blockState().parse(new StringReader(blockID));
                     responseString = setBlock(new BlockPos(x, y, z), bsi) + "";
-
-                } else {
+                } else if(method.equals("get")) {
+                    responseString = getBlock(new BlockPos(x, y, z)) + "";
+                } else{
                     statusCode = 405;
                     responseString = "Method not allowed. Only POST requests are supported.";
                 }
+            } catch (CommandSyntaxException e) {
+                // could be either from parsing or from placing
+                responseString = e.getMessage();
+                statusCode = 400;
             }
-        } catch (CommandSyntaxException e) {
-            responseString = "Could not parse block state: " + e.getMessage();
-            statusCode = 400;
         }
 
         //headers
         Headers headers = httpExchange.getResponseHeaders();
 
+        addDefaultHeaders(headers);
         headers.add("Content-Type", "text/raw; charset=UTF-8");
-
 
         // body
 
@@ -100,11 +103,23 @@ public class SetBlockHandler extends HandlerBase {
         if (!state.place(serverWorld, pos, 2)) {
             throw FAILED_EXCEPTION.create();
         } else {
+            // notify surrounding blocks ('block update')
+            // TODO: #121 Could probably remove this if we just set 1-flag (flags == 1 & 2 == 3)?
             serverWorld.func_230547_a_(pos, state.getState().getBlock());
+            return 1;
 //            (new TranslationTextComponent(
 //                    "commands.setblock.success",
 //                    pos.getX(), pos.getY(), pos.getZ())).getString();
-            return 1;
         }
+    }
+
+    private String getBlock(BlockPos pos) {
+        ServerWorld serverWorld = mcServer.getWorld(World.OVERWORLD);
+
+        assert serverWorld != null;
+
+        BlockState bs = serverWorld.getBlockState(pos);
+
+        return String.valueOf(bs.getBlock().getRegistryName());
     }
 }

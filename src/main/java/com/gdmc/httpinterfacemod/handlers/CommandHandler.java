@@ -40,7 +40,7 @@ public class CommandHandler extends HandlerBase {
             try {
                 result = "" + mcServer.getCommandManager().getDispatcher().execute(command, mcServer.getCommandSource());
             } catch (CommandSyntaxException e) {
-                result = e.getMessage(); // TODO could return an error instead
+                result = e.getMessage();
                 LOGGER.error(e.getMessage());
             }
             outputs.add(result + "");

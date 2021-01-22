@@ -1,5 +1,6 @@
 package com.gdmc.httpinterfacemod.handlers;
 
+import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpHandler;
 import net.minecraft.server.MinecraftServer;
 
@@ -14,7 +15,11 @@ public abstract class HandlerBase implements HttpHandler {
         this.mcServer = mcServer;
     }
 
-    public static Map<String, String> parseQueryString(String qs) {
+    protected static void addDefaultHeaders(Headers headers) {
+        headers.add("Access-Control-Allow-Origin", "*");
+    }
+
+    protected static Map<String, String> parseQueryString(String qs) {
         Map<String, String> result = new HashMap<>();
         if (qs == null)
             return result;

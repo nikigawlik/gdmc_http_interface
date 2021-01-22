@@ -93,9 +93,11 @@ request body:
 Sets a block in the Minecraft world, similar to the /setblock command. 
 
 The x, y, z parameters specify the block location. 
-The request body specifies the block using Minecraft's <block> argument syntax, a more complicated example would be:
+The request body specifies the block using Minecraft's <block> argument syntax, it also supports block states:
 
-`minecraft:furnace[facing=north]{BurnTime:200}`
+`minecraft:furnace[facing=north]`
+
+Specifying additional nbt data (like inventory contents) is not supported at the moment. For now, you can use the /command endpoint to add nbt tags to a block through the use of the [Minecraft /data command](https://minecraft.gamepedia.com/Commands/data).
 
 More info on the block state syntax can be found [on the Minecraft wiki](https://minecraft.gamepedia.com/Commands#.3Cblock.3E)
 

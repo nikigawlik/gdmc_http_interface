@@ -1,8 +1,6 @@
 package com.gdmc.httpinterfacemod;
 
-import com.gdmc.httpinterfacemod.handlers.ChunkHandler;
-import com.gdmc.httpinterfacemod.handlers.CommandHandler;
-import com.gdmc.httpinterfacemod.handlers.SetBlockHandler;
+import com.gdmc.httpinterfacemod.handlers.*;
 import com.sun.net.httpserver.HttpServer;
 import net.minecraft.server.MinecraftServer;
 import org.apache.logging.log4j.LogManager;
@@ -31,7 +29,8 @@ public class GdmcHttpServer {
     private static void createContexts() {
         httpServer.createContext("/command", new CommandHandler(mcServer));
         httpServer.createContext("/chunks", new ChunkHandler(mcServer));
-        httpServer.createContext("/setblock", new SetBlockHandler(mcServer));
+        httpServer.createContext("/block", new BlockHandler(mcServer));
+        httpServer.createContext("/blockstate", new BlockStateHandler(mcServer));
     }
 }
 
