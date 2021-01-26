@@ -3,6 +3,7 @@ package com.gdmc.httpinterfacemod.handlers;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
+import net.minecraft.command.CommandSource;
 import net.minecraft.server.MinecraftServer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -15,9 +16,11 @@ import java.util.stream.Collectors;
 
 public class CommandHandler extends HandlerBase {
     private static final Logger LOGGER = LogManager.getLogger();
+    private final CommandSource cmdSrc;
 
     public CommandHandler(MinecraftServer mcServer) {
         super(mcServer);
+        cmdSrc = createCommandSource("GDMC-CommandHandler", mcServer);
     }
 
     @Override
@@ -38,7 +41,7 @@ public class CommandHandler extends HandlerBase {
         for (String command: commands) {
             String result;
             try {
-                result = "" + mcServer.getCommandManager().getDispatcher().execute(command, mcServer.getCommandSource());
+                result = "" + mcServer.getCommandManager().getDispatcher().execute(command, cmdSrc);
             } catch (CommandSyntaxException e) {
                 result = e.getMessage();
                 LOGGER.error(e.getMessage());

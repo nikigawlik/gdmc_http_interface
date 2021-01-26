@@ -2,12 +2,20 @@ package com.gdmc.httpinterfacemod.handlers;
 
 import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpHandler;
+import net.minecraft.command.CommandSource;
+import net.minecraft.command.ICommandSource;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.util.math.vector.Vector2f;
+import net.minecraft.util.math.vector.Vector3d;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.world.World;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 public abstract class HandlerBase implements HttpHandler {
     MinecraftServer mcServer;
@@ -44,5 +52,26 @@ public abstract class HandlerBase implements HttpHandler {
             last = next + 1;
         }
         return result;
+    }
+
+    protected static CommandSource createCommandSource(String name, MinecraftServer mcServer) {
+        ICommandSource iCmdSrc = new ICommandSource() {
+            @Override public void sendMessage(ITextComponent component, UUID senderUUID) { }
+            @Override public boolean shouldReceiveFeedback() { return false; }
+            @Override public boolean shouldReceiveErrors() { return false; }
+            @Override public boolean allowLogging() { return false; }
+        };
+
+        return new CommandSource(
+                iCmdSrc,
+                new Vector3d(0, 0, 0),
+                new Vector2f(0, 0),
+                mcServer.getWorld(World.OVERWORLD),
+                2,
+                name,
+                new StringTextComponent(name),
+                mcServer,
+                null
+        );
     }
 }
