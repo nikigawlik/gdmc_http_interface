@@ -55,29 +55,23 @@ No blocks were filled
 
 For commands and their return values consult the [Minecraft commands documentation](https://minecraft.gamepedia.com/Commands#List_and_summary_of_commands).
 
-### Get chunk data
+### Read a block
 
-`GET http://localhost:9000/chunks?x=<int>&z=<int>&dx=<int>&dz=<int>`
+`GET http://localhost:9000/blocks?x=<int>&y=<int>&z=<int>`
+
+This returns the namespaced id of the block at position x, y, z. 
 
 for example
 
-`GET http://localhost:9000/chunks?x=0&z=0&dx=2&dz=2`
+`GET http://localhost:9000/blocks?x=-354&y=48&z=1023`
 
-This returns the chunks as an NBT data structure. [The NBT format](https://minecraft.gamepedia.com/NBT_format) is the save format Minecraft uses for most things. There are open source NBT parsers available for different languages including Python and C#.
-
-If you set the 'Accept' header of your request to "application/octet-stream" you will get raw binary data. This is what you probably want if you are using an NBT parsing library.
-
-If the Accept header is anything else, you will get a human readable representation, which looks like this:
-
-```
-{Chunks:[{Level:{Status:"full",zPos:0,LastUpdate:6560L,Biomes:[I;3,3,3,3,7,7 ...
-```
-
-This human readable representation of NBT is defined by Minecraft and used in different places, for example when using NBT data in commands. 
+could return:
+ 
+`minecraft:stone`
 
 ### Set a block
 
-`POST http://localhost:9000/setblock?x=<int>&y=<int>&z=<int>`
+`PUT http://localhost:9000/blocks?x=<int>&y=<int>&z=<int>`
 
 request body: 
 
@@ -85,7 +79,7 @@ request body:
 
 for example
 
-`POST http://localhost:9000/setblock?x=-354&y=67&z=1023`
+`PUT http://localhost:9000/blocks?x=-354&y=67&z=1023`
 
 request body: 
 `minecraft:stone`
@@ -97,10 +91,68 @@ The request body specifies the block using Minecraft's <block> argument syntax, 
 
 `minecraft:furnace[facing=north]`
 
-Specifying additional nbt data (like inventory contents) is not supported at the moment. For now, you can use the /command endpoint to add nbt tags to a block through the use of the [Minecraft /data command](https://minecraft.gamepedia.com/Commands/data).
+Specifying additional nbt data (like inventory contents) is not supported at the moment. For now, you can use the /command endpoint with Minecraft's /setblock or /data command instead.
 
 More info on the block state syntax can be found [on the Minecraft wiki](https://minecraft.gamepedia.com/Commands#.3Cblock.3E)
 
+#### Setting blocks in bulk
+
+`PUT http://localhost:9000/blocks?x=<int>&y=<int>&z=<int>`
+
+request body: 
+
+```
+<x> <y> <z> <block>
+<x> <y> <z> <block>
+<x> <y> <z> <block>
+...
+```
+
+for example
+
+`PUT http://localhost:9000/blocks?x=-354&y=67&z=1023`
+
+request body: 
+```
+~0 ~0 ~1 minecraft:stone
+~0 ~0 ~2 minecraft:stone
+~0 ~0 ~3 minecraft:stone
+~0 ~0 ~3 minecraft:stone
+~1 ~0 ~3 minecraft:stone
+~2 ~0 ~3 minecraft:stone
+```
+
+The /blocks endpoint can also contain multiple lines, with each line corresponding to setting one block. The x, y, and z coordinates can be specified in tilde notation (`~1 ~2 ~3`). In that case they are relative to the position specified in the x, y and z query parameters.
+
+It is completely feasible to send hundreds of blocks at once with this endpoint. Minecraft will then place them as quickly as possible and return the request once it has placed all the blocks.
+
+### Get chunk data
+
+`GET http://localhost:9000/chunks?x=<int>&z=<int>&dx=<int>&dz=<int>`
+
+for example
+
+`GET http://localhost:9000/chunks?x=0&z=0&dx=2&dz=2`
+
+This returns the chunks as an NBT data structure. [The NBT format](https://minecraft.gamepedia.com/NBT_format) is the save format Minecraft uses for most things. There are open source NBT parsers available for different languages including Python and C#.
+
+The query parameters x and z specify the position of the chuck in 'chunk coordinates'. To get a chunk coordinate from a normal world coordinate, simply divide by 16 and round down to the nearest integer.
+
+The query parameters dx and dz specify how many chunks to get. So dx=3 and dz=4 would get you a 3 by 4 area of chunks, so 12 chunks in total.
+
+The chunks within the returned nbt structure are arranged in z, x order, so the chunk at position (x, z) is in the array at position (x + z * dx).
+
+If you set the 'Accept' header of your request to "application/octet-stream" you will get raw binary data. This is what you probably want if you are using an NBT parsing library.
+
+If the Accept header is anything else, you will get a human readable representation, which looks like this:
+
+```
+{Chunks:[{Level:{Status:"full",zPos:0,LastUpdate:6560L,Biomes:[I;3,3,3,3,7,7 ...
+```
+
+This human readable representation of NBT is defined by Minecraft and used in different places, for example when using NBT data in commands. 
+
+The layout of the chunk save data is not completely trivial to process. An example on how to read this data and extract block and heightmap information you can take a look at [this python script](https://github.com/nilsgawlik/gdmc_http_client_python/blob/master/worldLoader.py).
 
 ## Installing this mod with the Forge Mod Launcher
 
