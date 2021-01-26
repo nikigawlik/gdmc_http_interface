@@ -1,6 +1,15 @@
-## checklist for updating to newer forge version
+
+## checklist for updating to newer forge version / making a release
 
 Just a simple checklist for myself, when I want to update this mod to a newer version.
+
+## update documentation & make a changelog
+
+check your latest commits to see what changed
+
+## update forge version
+
+If version is up to date (see 2.), just jump to 7.
 
 ### 0. Have a backup!
 
@@ -41,7 +50,7 @@ find newest (stable) version on https://files.minecraftforge.net/
 
 ### 7. Increase version
 
-Increase version id in build.gradle
+Increase version id in build.gradles
 
 ### 8. Run tasks
 
@@ -52,3 +61,17 @@ Try out the published jar in the mod launcher
 ### 9. Change version in README 
 
 Update the version in the "Installing this mod with the Forge Mod Launcher" section
+
+### merge / push
+
+merge into master, push to master and make a release on github.
+
+Paste / write changelog
+
+Upload the mod jar (`build/files/gdmchttp-x.x.x.jar`)
+
+### post release
+
+Update the link in the README.md to point to the release
+
+Notify people on discord
