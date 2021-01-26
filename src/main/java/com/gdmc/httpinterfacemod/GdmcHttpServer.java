@@ -2,6 +2,7 @@ package com.gdmc.httpinterfacemod;
 
 import com.gdmc.httpinterfacemod.handlers.*;
 import com.sun.net.httpserver.HttpServer;
+import net.minecraft.command.CommandSource;
 import net.minecraft.server.MinecraftServer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -16,6 +17,9 @@ public class GdmcHttpServer {
 
     public static void startServer(MinecraftServer mcServer) throws IOException {
         GdmcHttpServer.mcServer = mcServer;
+
+
+
         httpServer = HttpServer.create(new InetSocketAddress(9000), 0);
         httpServer.setExecutor(null); // creates a default executor
         createContexts();
@@ -29,7 +33,7 @@ public class GdmcHttpServer {
     private static void createContexts() {
         httpServer.createContext("/command", new CommandHandler(mcServer));
         httpServer.createContext("/chunks", new ChunkHandler(mcServer));
-        httpServer.createContext("/block", new BlockHandler(mcServer));
+        httpServer.createContext("/blocks", new BlocksHandler(mcServer));
         httpServer.createContext("/blockstate", new BlockStateHandler(mcServer));
     }
 }
