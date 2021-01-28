@@ -1,4 +1,4 @@
-# Minecraft HTTP Interface Mod (Minecraft 1.16.3)
+# Minecraft HTTP Interface Mod (Minecraft 1.16.4)
 
 This repo is based on the [GDMC example mod](https://github.com/Lasbleic/gdmc_java_mod) which is based on the Forge MDK.
 
