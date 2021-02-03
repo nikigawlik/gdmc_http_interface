@@ -11,14 +11,7 @@ check your latest commits to see what changed
 
 If version is up to date (see 2.), just jump to 7.
 
-### 0. Have a backup!
-
-### 1. run script to apply mappings to the code
-
-(replace the mappings id (YYYYMMDD-1.XX.X), see 2. for where to find it)
-```
-./gradlew -PUPDATE_MAPPINGS="20201028-1.16.3" -PUPDATE_MAPPINGS_CHANNEL="snapshot" updateMappings
-```
+### 1. Have a backup!
 
 ### 2. update build.gradle
 
@@ -48,9 +41,20 @@ find newest (stable) version on https://files.minecraftforge.net/
 
 ### 6. File > Reload all from disk
 
+### 6.1. run script to apply mappings to the code
+
+(replace the mappings id (YYYYMMDD-1.XX.X), see 2. for where to find it)
+```
+./gradlew -PUPDATE_MAPPINGS="20201028-1.16.3" -PUPDATE_MAPPINGS_CHANNEL="snapshot" updateMappings
+```
+
+### 6.2. File > Reload all from disk just in case :p
+
+
 ### 7. Increase version
 
-Increase version id in build.gradles
+Increase version id in build.gradle
+
 
 ### 8. Run tasks
 
@@ -75,3 +79,5 @@ Upload the mod jar (`build/files/gdmchttp-x.x.x.jar`)
 Update the link in the README.md to point to the release
 
 Notify people on discord
+
+Update python scripts
