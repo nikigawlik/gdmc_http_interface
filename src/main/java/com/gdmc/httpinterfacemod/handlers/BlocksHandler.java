@@ -2,7 +2,6 @@ package com.gdmc.httpinterfacemod.handlers;
 
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
 import net.minecraft.block.BlockState;
@@ -16,7 +15,6 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.vector.Vector3d;
-import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
 
@@ -30,7 +28,7 @@ import java.util.stream.Collectors;
 //new CachedBlockInfo(p_210438_0_.getSource().getWorld(), BlockPosArgument.getLoadedBlockPos(p_210438_0_, "pos"), true)
 
 public class BlocksHandler extends HandlerBase {
-    private static final SimpleCommandExceptionType FAILED_EXCEPTION = new SimpleCommandExceptionType(new TranslationTextComponent("commands.setblock.failed"));
+//    private static final SimpleCommandExceptionType FAILED_EXCEPTION = new SimpleCommandExceptionType(new TranslationTextComponent("commands.setblock.failed"));
     private final CommandSource cmdSrc;
 
     public BlocksHandler(MinecraftServer mcServer) {
@@ -135,7 +133,7 @@ public class BlocksHandler extends HandlerBase {
         outputStream.close();
     }
 
-    private int setBlock(BlockPos pos, BlockStateInput state) throws CommandSyntaxException {
+    private int setBlock(BlockPos pos, BlockStateInput state) {
         ServerWorld serverWorld = mcServer.getWorld(World.OVERWORLD);
 
         assert serverWorld != null;
@@ -143,7 +141,7 @@ public class BlocksHandler extends HandlerBase {
         IClearable.clearObj(tileentity);
 
         if (!state.place(serverWorld, pos, 2)) {
-            throw FAILED_EXCEPTION.create();
+            return 0;
         } else {
             // notify surrounding blocks ('block update')
             // TODO: #121 Could probably remove this if we just set 1-flag (flags == 1 & 2 == 3)?
