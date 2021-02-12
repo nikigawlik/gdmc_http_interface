@@ -63,7 +63,7 @@ public class ChunkHandler extends HandlerBase {
                 ListNBT chunkList = new ListNBT();
                 for(int z = chunkZ; z < chunkZ + chunkDZ; z++)
                     for(int x = chunkX; x < chunkX + chunkDX; x++) {
-                        Chunk chunk = world.getChunk(x, z); // TODO: #122 handle when chunk doesn't exist
+                        Chunk chunk = world.getChunk(x, z);
 
                         CompoundNBT chunkNBT = ChunkSerializer.write(world, chunk);
                         chunkList.add(chunkNBT);

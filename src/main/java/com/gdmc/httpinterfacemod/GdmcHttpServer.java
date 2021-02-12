@@ -35,6 +35,7 @@ public class GdmcHttpServer {
         httpServer.createContext("/chunks", new ChunkHandler(mcServer));
         httpServer.createContext("/blocks", new BlocksHandler(mcServer));
         httpServer.createContext("/blockstate", new BlockStateHandler(mcServer));
+        httpServer.createContext("/buildarea", new BuildAreaHandler(mcServer));
     }
 }
 
