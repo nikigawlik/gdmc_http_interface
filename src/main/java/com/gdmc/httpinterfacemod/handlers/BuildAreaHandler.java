@@ -70,7 +70,6 @@ public class BuildAreaHandler extends HandlerBase {
 
         //headers
         Headers headers = httpExchange.getResponseHeaders();
-        headers.add("Content-Type", "application/json; charset=UTF-8");
 
 
         // body
@@ -78,12 +77,15 @@ public class BuildAreaHandler extends HandlerBase {
         int returnCode;
         if(!method.equals("get")) {
             returnCode = 405;
+            headers.add("Content-Type", "text/raw; charset=UTF-8");
             responseString = "Please use GET method to request the build area.";
         } else if(buildArea == null) {
             returnCode = 404;
+            headers.add("Content-Type", "text/raw; charset=UTF-8");
             responseString = "No build area is specified. Use the buildarea command inside Minecraft to set a build area.";
         } else {
             returnCode = 200;
+            headers.add("Content-Type", "application/json; charset=UTF-8");
             responseString = new Gson().toJson(buildArea);
         }
         byte[] responseBytes = responseString.getBytes(StandardCharsets.UTF_8);
