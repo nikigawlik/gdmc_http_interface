@@ -154,6 +154,20 @@ This human readable representation of NBT is defined by Minecraft and used in di
 
 The layout of the chunk save data is not completely trivial to process. An example on how to read this data and extract block and heightmap information you can take a look at [this python script](https://github.com/nilsgawlik/gdmc_http_client_python/blob/master/worldLoader.py).
 
+### Get the build area
+
+`GET http://localhost:9000/buildarea`
+
+This returns the current specified build area. The build area can be set inside Minecraft using the `setbuildarea` command. This is just a convenience command to specify the area, it has no implications to where blocks can be placed or read on the map.
+
+The syntax for the `setbuildarea` Minecraft command is `/setbuildarea xFrom yFrom zFrom xTo yTo zTo`.
+
+The return value will be in json format, and contain the coordinates for two positions ("from" and "to") for example:
+
+`{"xFrom":0,"yFrom":0,"zFrom":0,"xTo":256,"yTo":256,"zTo":256}`
+
+The area will not be saved when you close the world. If no area was specified since the world was loaded, the request will return a 404 error.
+
 ## Installing this mod with the Forge Mod Launcher
 
 You need to own a copy of Minecraft and have it installed on your machine. 
