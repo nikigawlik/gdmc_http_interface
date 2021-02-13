@@ -187,7 +187,7 @@ You just have to import the build.gradle in the IDE, and the project will be imp
 
 - For most, if not all, changes to the build.gradle file to take effect Gradle will need to be invoked to re-evaluate the project, this can be done through Refresh buttons in the Gradle panels of both the previously mentioned IDEs.
 
-I personnaly would go for IntelliJ.
+I personally would go for IntelliJ.
 
 #### Generating IDE Launch/Run Configurations:
 
