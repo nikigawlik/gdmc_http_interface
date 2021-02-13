@@ -6,7 +6,7 @@ This repo is based on the [GDMC example mod](https://github.com/Lasbleic/gdmc_ja
 
 (Disclaimer: This mod is in early development)
 
-This mod opens an HTTP interface so that other programs (on the same machine) can read and modify the world. It is meant as a tool to be used for the [Generative Design in Minecraft Competition](http://gendesignmc.engineering.nyu.edu/), but is not approved as a submission method, so right now it is only useful for prototyping ideas!
+This mod opens an HTTP interface so that other programs (on the same machine) can read and modify the world. It is meant as a tool to be used for the [Generative Design in Minecraft Competition](http://gendesignmc.engineering.nyu.edu/). Install instructions can be found [further down](#installing-this-mod-with-the-forge-mod-launcher).
 
 When you open a Minecraft world, this mod opens a HTTP Server on localhost:9000. I recommend using Postman or a similar application to test out the http interface. A Python example of how to use the interface can be found [here](https://github.com/nilsgawlik/gdmc_http_client_python). This HTTP Interface currently implements these endpoints:
 
