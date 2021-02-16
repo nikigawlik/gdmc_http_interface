@@ -25,6 +25,7 @@ public abstract class HandlerBase implements HttpHandler {
 
     protected static void addDefaultHeaders(Headers headers) {
         headers.add("Access-Control-Allow-Origin", "*");
+        headers.add("Content-Disposition", "inline");
     }
 
     protected static Map<String, String> parseQueryString(String qs) {
