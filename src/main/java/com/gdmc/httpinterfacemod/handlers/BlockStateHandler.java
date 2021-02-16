@@ -80,7 +80,7 @@ public class BlockStateHandler extends HandlerBase {
         if(RETURN_JSON) {
             headers.add("Content-Type", "application/json");
         } else {
-            headers.add("Content-Type", "text/raw; charset=UTF-8");
+            headers.add("Content-Type", "text/plain; charset=UTF-8");
         }
 
         // body

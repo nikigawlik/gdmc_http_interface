@@ -97,7 +97,7 @@ public class ChunkHandler extends HandlerBase {
         //headers
         Headers headers = httpExchange.getResponseHeaders();
         if(RETURN_TEXT) {
-            headers.add("Content-Type", "text/raw; charset=UTF-8");
+            headers.add("Content-Type", "text/plain; charset=UTF-8");
         } else {
             headers.add("Content-Type", "application/octet-stream");
         }

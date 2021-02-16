@@ -53,7 +53,7 @@ public class CommandHandler extends HandlerBase {
 
         //headers
         Headers headers = httpExchange.getResponseHeaders();
-        headers.add("Content-Type", "text/raw; charset=UTF-8");
+        headers.add("Content-Type", "text/plain; charset=UTF-8");
 
         // body
         byte[] responseBytes = responseString.getBytes(StandardCharsets.UTF_8);

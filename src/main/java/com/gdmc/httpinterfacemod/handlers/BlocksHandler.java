@@ -121,7 +121,7 @@ public class BlocksHandler extends HandlerBase {
         Headers headers = httpExchange.getResponseHeaders();
 
         addDefaultHeaders(headers);
-        headers.add("Content-Type", "text/raw; charset=UTF-8");
+        headers.add("Content-Type", "text/plain; charset=UTF-8");
 
         // body
 
