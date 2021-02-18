@@ -38,7 +38,7 @@ public class BlocksHandler extends HandlerBase {
     }
 
     @Override
-    public void handle(HttpExchange httpExchange) throws IOException {
+    public void internalHandle(HttpExchange httpExchange) throws IOException {
         String method = httpExchange.getRequestMethod().toLowerCase();
 
         // look at incoming request

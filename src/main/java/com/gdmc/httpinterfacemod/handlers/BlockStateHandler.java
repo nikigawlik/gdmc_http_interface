@@ -1,18 +1,13 @@
 package com.gdmc.httpinterfacemod.handlers;
 
-import com.google.common.collect.ImmutableSet;
 import com.google.gson.Gson;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import com.mojang.realmsclient.util.JsonUtils;
 import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
 import net.minecraft.block.BlockState;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.state.Property;
-import net.minecraft.util.JSONUtils;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
@@ -24,9 +19,7 @@ import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.Objects;
-import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 public class BlockStateHandler extends HandlerBase {
@@ -35,7 +28,7 @@ public class BlockStateHandler extends HandlerBase {
     }
 
     @Override
-    public void handle(HttpExchange httpExchange) throws IOException {
+    public void internalHandle(HttpExchange httpExchange) throws IOException {
         String method = httpExchange.getRequestMethod().toLowerCase();
 
         // look at incoming request

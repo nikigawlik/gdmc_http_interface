@@ -24,7 +24,7 @@ public class CommandHandler extends HandlerBase {
     }
 
     @Override
-    public void handle(HttpExchange httpExchange) throws IOException {
+    public void internalHandle(HttpExchange httpExchange) throws IOException {
 //            //debug
 //            Headers reqHeaders = httpExchange.getRequestHeaders();
 //            LOGGER.info("Request headers: ");
