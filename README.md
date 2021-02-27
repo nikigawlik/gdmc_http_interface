@@ -170,7 +170,7 @@ The area will not be saved when you close the world. If no area was specified si
 
 ## Installing this mod with the Forge Mod Launcher
 
-You need to own a copy of Minecraft and have it installed on your machine. 
+You need to own a copy of Minecraft (Java Version) and have it installed on your machine. 
 
 Get the [Forge Mod Launcher](https://files.minecraftforge.net/) (Download Recommended -> Installer) and install it (client install, but server should work, too). The latest version I tested is 1.16.4-35.1.15, but newer versions should work just fine.
 
@@ -182,9 +182,11 @@ Download the jar file from [here](https://github.com/nilsgawlik/gdmc_http_interf
 
 Restart Minecraft and launch the Forge Installation again. The mod should now appear in the mod list under "Mods".
 
-When you open a world the HTTP Server will be started automatically
+When you open a world the HTTP Server will be started automatically, and you should now be able to send HTTP requests to it.
 
 ## Running this mod from source
+
+If you want to contribute to the development of the http interface mod, or are just interested how it works under the hood, you can also download the source code and run the mod from the source.
 
 These instructions are adapted from the [Forge installation guide](https://mcforge.readthedocs.io/en/1.14.x/gettingstarted/#getting-started-with-forge)
 
