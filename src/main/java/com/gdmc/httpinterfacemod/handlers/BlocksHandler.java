@@ -1,5 +1,9 @@
 package com.gdmc.httpinterfacemod.handlers;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.sun.net.httpserver.Headers;
@@ -12,17 +16,23 @@ import net.minecraft.command.arguments.BlockStateInput;
 import net.minecraft.command.arguments.ILocationArgument;
 import net.minecraft.inventory.IClearable;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.state.Property;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 
+import javax.annotation.Nullable;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 //new CachedBlockInfo(p_210438_0_.getSource().getWorld(), BlockPosArgument.getLoadedBlockPos(p_210438_0_, "pos"), true)
@@ -48,17 +58,22 @@ public class BlocksHandler extends HandlerBase {
 
         int statusCode = 200;
 
+        // query parameters
         int x = 0;
         int y = 0;
         int z = 0;
         boolean doBlockUpdates = true;
         boolean spawnDrops = false;
         int customFlags = -1; // -1 == no custom flags
+        boolean includeState = false;
 
         try {
             x = Integer.parseInt(queryParams.getOrDefault("x", "0"));
             y = Integer.parseInt(queryParams.getOrDefault("y", "0"));
             z = Integer.parseInt(queryParams.getOrDefault("z", "0"));
+
+            includeState = Boolean.parseBoolean(queryParams.getOrDefault("includeState", Boolean.toString(includeState)));
+
             doBlockUpdates = Boolean.parseBoolean(queryParams.getOrDefault("doBlockUpdates", Boolean.toString(doBlockUpdates)));
             spawnDrops = Boolean.parseBoolean(queryParams.getOrDefault("spawnDrops", Boolean.toString(spawnDrops)));
             // TODO: Uncomment this to enable the customFlags feature!
@@ -67,6 +82,10 @@ public class BlocksHandler extends HandlerBase {
             responseString = "Could not parse query parameter: " + e.getMessage();
             statusCode = 400;
         }
+
+        // if content type is application/json use that otherwise return text
+        String contentType = httpExchange.getRequestHeaders().get("Accept").get(0);
+        boolean returnJson = contentType.equals("application/json") || contentType.equals("text/json");
 
         if(statusCode == 200) {
             // construct response
@@ -114,9 +133,25 @@ public class BlocksHandler extends HandlerBase {
                     }
                     returnValues.add(returnValue);
                 }
-                responseString = String.join("\n", returnValues);
+                if(!returnJson) {
+                    responseString = String.join("\n", returnValues);
+                } else {
+                    JsonObject json = new JsonObject();
+                    JsonArray resultsArray = new JsonArray();
+
+                    for(String s : returnValues) {
+                        resultsArray.add(s);
+                    }
+
+                    json.add("results", resultsArray);
+                    responseString = new Gson().toJson(json);
+                }
             } else if(method.equals("get")) {
-                responseString = getBlock(new BlockPos(x, y, z)) + "";
+                if(includeState) {
+                    responseString = getBlockWithState(new BlockPos(x, y, z), returnJson);
+                } else {
+                    responseString = getBlock(new BlockPos(x, y, z), returnJson) + "";
+                }
             } else{
                 statusCode = 405;
                 responseString = "Method not allowed. Only PUT and GET requests are supported.";
@@ -171,13 +206,95 @@ public class BlocksHandler extends HandlerBase {
         return 2 | ( doBlockUpdates? 1 : (32 | 16) ) | ( spawnDrops? 0 : 32 );
     }
 
-    private String getBlock(BlockPos pos) {
+    private String getBlock(BlockPos pos, boolean returnJson) {
         ServerWorld serverWorld = mcServer.getWorld(World.OVERWORLD);
 
         assert serverWorld != null;
 
         BlockState bs = serverWorld.getBlockState(pos);
 
-        return String.valueOf(bs.getBlock().getRegistryName());
+        String str;
+        if(returnJson) {
+            JsonObject json = new JsonObject();
+
+            ResourceLocation rl = bs.getBlock().getRegistryName();
+            assert rl != null;
+            json.add("id", new JsonPrimitive(rl.toString()));
+
+            str = new Gson().toJson(json);
+        } else {
+            str = Objects.requireNonNull(bs.getBlock().getRegistryName()).toString();
+        }
+
+        return str;
     }
+
+    private String getBlockWithState(BlockPos pos, boolean returnJson) {
+        ServerWorld serverWorld = mcServer.getWorld(World.OVERWORLD);
+
+        assert serverWorld != null;
+        // TODO: #118 if we ever want to do nbt
+//        TileEntity tileentity = serverWorld.getTileEntity(pos);
+
+        BlockState bs = serverWorld.getBlockState(pos);
+
+        String str;
+        if(returnJson) {
+            JsonObject json = new JsonObject();
+
+            ResourceLocation rl = bs.getBlock().getRegistryName();
+            assert rl != null;
+            json.add("id", new JsonPrimitive(rl.toString()));
+
+            JsonObject state = new JsonObject();
+            // put state values into the state object
+            bs.getValues().entrySet().stream()
+                    .map(propertyToStringPairFunction)
+                    .filter(Objects::nonNull)
+                    .forEach(pair -> state.add(pair.getKey(), new JsonPrimitive(pair.getValue())));
+
+            json.add("state", state);
+            str = new Gson().toJson(json);
+        } else {
+            str = String.valueOf(bs.getBlock().getRegistryName()) +
+                    '[' +
+                    bs.getValues().entrySet().stream().map(propertyToStringFunction).collect(Collectors.joining(",")) +
+                    ']';
+        }
+        return str;
+    }
+
+    // function that converts a bunch of Property/Comparable pairs into strings that look like 'property=value'
+    private static final Function<Map.Entry<Property<?>, Comparable<?>>, String> propertyToStringFunction =
+            new Function<Map.Entry<Property<?>, Comparable<?>>, String>() {
+                public String apply(@Nullable Map.Entry<Property<?>, Comparable<?>> element) {
+                    if (element == null) {
+                        return "<NULL>";
+                    } else {
+                        Property<?> property = element.getKey();
+                        return property.getName() + "=" + this.valueToName(property, element.getValue());
+                    }
+                }
+
+                private <T extends Comparable<T>> String valueToName(Property<T> property, Comparable<?> propertyValue) {
+                    return property.getName((T)propertyValue);
+                }
+            };
+
+    // function that converts a bunch of Property/Comparable pairs into String/String pairs
+    private static final Function<Map.Entry<Property<?>, Comparable<?>>, Map.Entry<String, String>> propertyToStringPairFunction =
+            new Function<Map.Entry<Property<?>, Comparable<?>>, Map.Entry<String, String>>() {
+                public Map.Entry<String, String> apply(@Nullable Map.Entry<Property<?>, Comparable<?>> element) {
+                    if (element == null) {
+                        return null;
+                    } else {
+                        Property<?> property = element.getKey();
+                        return new ImmutablePair<String, String>(property.getName(), this.valueToName(property, element.getValue()));
+                    }
+                }
+
+                private <T extends Comparable<T>> String valueToName(Property<T> property, Comparable<?> propertyValue) {
+                    return property.getName((T)propertyValue);
+                }
+            };
 }
