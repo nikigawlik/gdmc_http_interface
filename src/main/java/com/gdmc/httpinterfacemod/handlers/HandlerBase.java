@@ -19,6 +19,7 @@ import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 
 public abstract class HandlerBase implements HttpHandler {
@@ -88,8 +89,8 @@ public abstract class HandlerBase implements HttpHandler {
                 iCmdSrc,
                 new Vector3d(0, 0, 0),
                 new Vector2f(0, 0),
-                mcServer.getWorld(World.OVERWORLD),
-                2,
+                Objects.requireNonNull(mcServer.getWorld(World.OVERWORLD)),
+                4,
                 name,
                 new StringTextComponent(name),
                 mcServer,
