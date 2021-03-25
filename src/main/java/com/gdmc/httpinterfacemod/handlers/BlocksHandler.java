@@ -51,13 +51,18 @@ public class BlocksHandler extends HandlerBase {
         int x = 0;
         int y = 0;
         int z = 0;
-//        boolean doBlockUpdates = false;
+        boolean doBlockUpdates = true;
+        boolean spawnDrops = false;
+        int customFlags = -1; // -1 == no custom flags
 
         try {
             x = Integer.parseInt(queryParams.getOrDefault("x", "0"));
             y = Integer.parseInt(queryParams.getOrDefault("y", "0"));
             z = Integer.parseInt(queryParams.getOrDefault("z", "0"));
-//            doBlockUpdates = Boolean.parseBoolean(queryParams.getOrDefault("doBlockUpdates", "false"));
+            doBlockUpdates = Boolean.parseBoolean(queryParams.getOrDefault("doBlockUpdates", Boolean.toString(doBlockUpdates)));
+            spawnDrops = Boolean.parseBoolean(queryParams.getOrDefault("spawnDrops", Boolean.toString(spawnDrops)));
+            // TODO: Uncomment this to enable the customFlags feature!
+//            customFlags = Integer.parseInt(queryParams.getOrDefault("customFlags", Integer.toString(customFlags)), 2);
         } catch (NumberFormatException e) {
             responseString = "Could not parse query parameter: " + e.getMessage();
             statusCode = 400;
@@ -71,6 +76,8 @@ public class BlocksHandler extends HandlerBase {
                         .lines().collect(Collectors.toList());
 
                 List<String> returnValues = new LinkedList<>();
+
+                int blockFlags = customFlags >= 0? customFlags : getBlockFlags(doBlockUpdates, spawnDrops);
 
                 for(String line : body) {
                     String returnValue;
@@ -98,8 +105,7 @@ public class BlocksHandler extends HandlerBase {
                             zz = z;
                         }
 
-//                        returnValue = setBlock(new BlockPos(xx, yy, zz), bsi, doBlockUpdates) + "";
-                        returnValue = setBlock(new BlockPos(xx, yy, zz), bsi) + "";
+                        returnValue = setBlock(new BlockPos(xx, yy, zz), bsi, blockFlags) + "";
                     } catch (CommandSyntaxException e) {
 //                        // could be either from parsing or from placing
 //                        responseString = e.getMessage();
@@ -133,25 +139,36 @@ public class BlocksHandler extends HandlerBase {
         outputStream.close();
     }
 
-    private int setBlock(BlockPos pos, BlockStateInput state) {
+    private int setBlock(BlockPos pos, BlockStateInput state, int flags) {
         ServerWorld serverWorld = mcServer.getWorld(World.OVERWORLD);
 
         assert serverWorld != null;
         TileEntity tileentity = serverWorld.getTileEntity(pos);
         IClearable.clearObj(tileentity);
 
-        if (!state.place(serverWorld, pos, 2)) {
+        if (!state.place(serverWorld, pos, flags)) {
             return 0;
         } else {
-            // notify surrounding blocks ('block update')
-            // TODO: #121 Could probably remove this if we just set 1-flag (flags == 1 & 2 == 3)?
-//            if(doBlockUpdates)
-            serverWorld.func_230547_a_(pos, state.getState().getBlock());
             return 1;
 //            (new TranslationTextComponent(
 //                    "commands.setblock.success",
 //                    pos.getX(), pos.getY(), pos.getZ())).getString();
         }
+    }
+
+    public int getBlockFlags(boolean doBlockUpdates, boolean spawnDrops) {
+        /*
+            flags:
+                * 1 will cause a block update.
+                * 2 will send the change to clients.
+                * 4 will prevent the block from being re-rendered.
+                * 8 will force any re-renders to run on the main thread instead
+                * 16 will prevent neighbor reactions (e.g. fences connecting, observers pulsing).
+                * 32 will prevent neighbor reactions from spawning drops.
+                * 64 will signify the block is being moved.
+        */
+        // construct flags
+        return 2 | ( doBlockUpdates? 1 : (32 | 16) ) | ( spawnDrops? 0 : 32 );
     }
 
     private String getBlock(BlockPos pos) {
