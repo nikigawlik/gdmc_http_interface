@@ -76,8 +76,7 @@ public class BlocksHandler extends HandlerBase {
 
             doBlockUpdates = Boolean.parseBoolean(queryParams.getOrDefault("doBlockUpdates", Boolean.toString(doBlockUpdates)));
             spawnDrops = Boolean.parseBoolean(queryParams.getOrDefault("spawnDrops", Boolean.toString(spawnDrops)));
-            // TODO: Uncomment this to enable the customFlags feature!
-//            customFlags = Integer.parseInt(queryParams.getOrDefault("customFlags", Integer.toString(customFlags)), 2);
+            customFlags = Integer.parseInt(queryParams.getOrDefault("customFlags", Integer.toString(customFlags)), 2);
         } catch (NumberFormatException e) {
             responseString = "Could not parse query parameter: " + e.getMessage();
             statusCode = 400;
