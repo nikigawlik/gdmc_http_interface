@@ -161,7 +161,11 @@ public class BlocksHandler extends HandlerBase {
         Headers headers = httpExchange.getResponseHeaders();
 
         addDefaultHeaders(headers);
-        headers.add("Content-Type", "text/plain; charset=UTF-8");
+        if(returnJson && statusCode < 400) {
+            headers.add("Content-Type", "application/json; charset=UTF-8");
+        } else {
+            headers.add("Content-Type", "text/plain; charset=UTF-8");
+        }
 
         // body
 
