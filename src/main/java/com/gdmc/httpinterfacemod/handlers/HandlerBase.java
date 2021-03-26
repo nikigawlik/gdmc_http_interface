@@ -1,6 +1,7 @@
 package com.gdmc.httpinterfacemod.handlers;
 
 import com.sun.net.httpserver.Headers;
+import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.ICommandSource;
@@ -11,10 +12,14 @@ import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.world.World;
 
+import java.io.IOException;
+import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 
 public abstract class HandlerBase implements HttpHandler {
@@ -22,6 +27,23 @@ public abstract class HandlerBase implements HttpHandler {
     public HandlerBase(MinecraftServer mcServer) {
         this.mcServer = mcServer;
     }
+
+    @Override
+    public void handle(HttpExchange httpExchange) throws IOException {
+        try {
+            internalHandle(httpExchange);
+        } catch (Exception e) {
+            String responseString = String.format("Internal server error: %s", e.toString());
+            byte[] responseBytes = responseString.getBytes(StandardCharsets.UTF_8);
+
+            httpExchange.sendResponseHeaders(500, responseBytes.length);
+            OutputStream outputStream = httpExchange.getResponseBody();
+            outputStream.write(responseBytes);
+            outputStream.close();
+        }
+    }
+
+    protected abstract void internalHandle(HttpExchange httpExchange) throws IOException;
 
     protected static void addDefaultHeaders(Headers headers) {
         headers.add("Access-Control-Allow-Origin", "*");
@@ -67,8 +89,8 @@ public abstract class HandlerBase implements HttpHandler {
                 iCmdSrc,
                 new Vector3d(0, 0, 0),
                 new Vector2f(0, 0),
-                mcServer.getWorld(World.OVERWORLD),
-                2,
+                Objects.requireNonNull(mcServer.getWorld(World.OVERWORLD)),
+                4,
                 name,
                 new StringTextComponent(name),
                 mcServer,

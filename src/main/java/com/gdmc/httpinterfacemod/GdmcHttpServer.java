@@ -18,8 +18,6 @@ public class GdmcHttpServer {
     public static void startServer(MinecraftServer mcServer) throws IOException {
         GdmcHttpServer.mcServer = mcServer;
 
-
-
         httpServer = HttpServer.create(new InetSocketAddress(9000), 0);
         httpServer.setExecutor(null); // creates a default executor
         createContexts();
@@ -27,14 +25,15 @@ public class GdmcHttpServer {
     }
 
     public static void stopServer() {
-        httpServer.stop(5);
+        if(httpServer != null) {
+            httpServer.stop(5);
+        }
     }
 
     private static void createContexts() {
         httpServer.createContext("/command", new CommandHandler(mcServer));
         httpServer.createContext("/chunks", new ChunkHandler(mcServer));
         httpServer.createContext("/blocks", new BlocksHandler(mcServer));
-        httpServer.createContext("/blockstate", new BlockStateHandler(mcServer));
         httpServer.createContext("/buildarea", new BuildAreaHandler(mcServer));
     }
 }

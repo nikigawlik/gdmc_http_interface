@@ -12,6 +12,7 @@ import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 public class CommandHandler extends HandlerBase {
@@ -24,7 +25,7 @@ public class CommandHandler extends HandlerBase {
     }
 
     @Override
-    public void handle(HttpExchange httpExchange) throws IOException {
+    public void internalHandle(HttpExchange httpExchange) throws IOException {
 //            //debug
 //            Headers reqHeaders = httpExchange.getRequestHeaders();
 //            LOGGER.info("Request headers: ");
@@ -39,14 +40,21 @@ public class CommandHandler extends HandlerBase {
 
         List<String> outputs = new ArrayList<>();
         for (String command: commands) {
-            String result;
-            try {
-                result = "" + mcServer.getCommandManager().getDispatcher().execute(command, cmdSrc);
-            } catch (CommandSyntaxException e) {
-                result = e.getMessage();
-                LOGGER.error(e.getMessage());
-            }
-            outputs.add(result + "");
+            // requests to run the actual command execution on the main thread
+            CompletableFuture<String> cfs = CompletableFuture.supplyAsync(() -> {
+                String str;
+                try {
+                    str = "" + mcServer.getCommandManager().getDispatcher().execute(command, cmdSrc);
+                } catch (CommandSyntaxException e) {
+                    LOGGER.error(e.getMessage());
+                    str = e.getMessage();
+                }
+                return str;
+            }, mcServer);
+
+            // block this thread until the above code has run on the main thread
+            String result = cfs.join();
+            outputs.add(result);
         }
 
         String responseString = String.join("\n", outputs);
