@@ -39,13 +39,17 @@ find newest (stable) version on https://files.minecraftforge.net/
 
 ### 5. Run the genIntellijRuns gradle task
 
+wait for background tasks to finish (might take a few minutes)
+
 ### 6. File > Reload all from disk
+
+wait for background tasks to finish
 
 ### 6.1. run script to apply mappings to the code
 
 (replace the mappings id (YYYYMMDD-1.XX.X), see 2. for where to find it)
 ```
-./gradlew -PUPDATE_MAPPINGS="20201028-1.16.3" -PUPDATE_MAPPINGS_CHANNEL="snapshot" updateMappings
+./gradlew -PUPDATE_MAPPINGS="20210309-1.16.5" -PUPDATE_MAPPINGS_CHANNEL="snapshot" updateMappings
 ```
 
 ### 6.2. File > Reload all from disk just in case :p

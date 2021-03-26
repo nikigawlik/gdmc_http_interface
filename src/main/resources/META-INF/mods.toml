@@ -21,18 +21,19 @@ version="${file.jarVersion}" #mandatory
  # A display name for the mod
 displayName="GDMC HTTP Interface Mod" #mandatory
 # A URL to query for updates for this mod. See the JSON update specification <here>
-updateJSONURL="http://myurl.me/" #optional
+#updateJSONURL="http://myurl.me/" #optional
 # A URL for the "homepage" for this mod, displayed in the mod UI
-displayURL="http://example.com/" #optional
+#displayURL="http://example.com/" #optional
 # A file name (in the root of the mod JAR) containing a logo for display
-logoFile="examplemod.png" #optional
+#logoFile="examplemod.png" #optional
 # A text field displayed in the mod UI
 credits="Thanks to the GDMC community and organizers" #optional
 # A text field displayed in the mod UI
-authors="..." #optional
+authors="Nils Gawlik" #optional
 # The description text for the mod (multi line!) (#mandatory)
 description='''
-This is a mod that provides an http interface for running commands and getting chunk data
+This is a mod that provides an http interface for things such as setting/getting blocks,
+running commands and getting chunk data
 '''
 # A dependency - use the . to indicate dependency for a specific modid. Dependencies are optional.
 [[dependencies.examplemod]] #optional
@@ -50,6 +51,6 @@ This is a mod that provides an http interface for running commands and getting c
 [[dependencies.examplemod]]
     modId="minecraft"
     mandatory=true
-    versionRange="[1.16.4]"
+    versionRange="[1.16.5]"
     ordering="NONE"
     side="BOTH"
