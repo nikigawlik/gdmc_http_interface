@@ -28,4 +28,4 @@ A detailed documentation of the endpoints can be found [over here](https://githu
 ## Installation
 
 Install instructions are [over here](https://github.com/nilsgawlik/gdmc_http_interface/wiki/Installation).
-You do need a copy of Minecraft to use the http interface!
+You need a copy of Minecraft to use the http interface!
