@@ -66,10 +66,6 @@ Run 'build', 'runClient' and 'publish' tasks and make sure everything works.
 
 Try out the published jar in the mod launcher
 
-### 9. Change version in README 
-
-Update the version in the "Installing this mod with the Forge Mod Launcher" section
-
 ### merge / push
 
 merge into master, push to master and make a release on github.
@@ -81,6 +77,8 @@ Upload the mod jar (`build/files/gdmchttp-x.x.x.jar`)
 ### post release
 
 Update the link in the README.md to point to the release
+
+Update the link in the Installation docs
 
 Notify people on discord
 
