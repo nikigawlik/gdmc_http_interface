@@ -51,7 +51,11 @@ public class ChunkHandler extends HandlerBase {
         }
 
         // with this header we return pure NBT binary
-        String contentType = httpExchange.getRequestHeaders().get("Accept").get(0);
+
+        // if content type is application/json use that otherwise return text
+        Headers reqestHeaders = httpExchange.getRequestHeaders();
+        String contentType = getHeader(reqestHeaders, "Accept", "*/*");
+
         boolean RETURN_TEXT = !contentType.equals("application/octet-stream");
 
         // construct response

@@ -17,10 +17,7 @@ import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 
 public abstract class HandlerBase implements HttpHandler {
     MinecraftServer mcServer;
@@ -48,6 +45,14 @@ public abstract class HandlerBase implements HttpHandler {
     protected static void addDefaultHeaders(Headers headers) {
         headers.add("Access-Control-Allow-Origin", "*");
         headers.add("Content-Disposition", "inline");
+    }
+
+    protected static String getHeader(Headers headers, String key, String defaultValue) {
+        List<String> list = headers.get(key);
+        if(list == null || list.size() == 0)
+            return defaultValue;
+        else
+            return list.get(0);
     }
 
     protected static Map<String, String> parseQueryString(String qs) {

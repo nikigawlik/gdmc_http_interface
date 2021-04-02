@@ -83,7 +83,8 @@ public class BlocksHandler extends HandlerBase {
         }
 
         // if content type is application/json use that otherwise return text
-        String contentType = httpExchange.getRequestHeaders().get("Accept").get(0);
+        Headers reqestHeaders = httpExchange.getRequestHeaders();
+        String contentType = getHeader(reqestHeaders, "Accept", "*/*");
         boolean returnJson = contentType.equals("application/json") || contentType.equals("text/json");
 
         if(statusCode == 200) {
