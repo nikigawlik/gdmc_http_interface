@@ -2,7 +2,7 @@
 
 This repo is based on the [GDMC example mod](https://github.com/Lasbleic/gdmc_java_mod) which is based on the Forge MDK.
 
-The latest release is [0.4.0 for Minecraft version 1.16.5](https://github.com/nilsgawlik/gdmc_http_interface/releases/tag/v0.4.0)
+The latest release is [0.4.1 for Minecraft version 1.16.5](https://github.com/nilsgawlik/gdmc_http_interface/releases/tag/v0.4.1)
 
 ## What it's all about
 
