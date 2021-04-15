@@ -11,15 +11,29 @@ import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.world.World;
+import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 public abstract class HandlerBase implements HttpHandler {
+
+    public static class HttpException extends RuntimeException {
+        public String message;
+        public int statusCode;
+        public HttpException(String message, int statusCode) {
+            this.message = message;
+            this.statusCode = statusCode;
+        }
+    }
+
+    private static final Logger LOGGER = LogManager.getLogger();
+
     MinecraftServer mcServer;
     public HandlerBase(MinecraftServer mcServer) {
         this.mcServer = mcServer;
@@ -29,14 +43,34 @@ public abstract class HandlerBase implements HttpHandler {
     public void handle(HttpExchange httpExchange) throws IOException {
         try {
             internalHandle(httpExchange);
-        } catch (Exception e) {
-            String responseString = String.format("Internal server error: %s", e.toString());
+        } catch (HttpException e) {
+            String responseString = e.message;
             byte[] responseBytes = responseString.getBytes(StandardCharsets.UTF_8);
+            Headers headers = httpExchange.getResponseHeaders();
+            headers.set("Content-Type", "text/plain; charset=UTF-8");
+
+            httpExchange.sendResponseHeaders(e.statusCode, responseBytes.length);
+            OutputStream outputStream = httpExchange.getResponseBody();
+            outputStream.write(responseBytes);
+            outputStream.close();
+
+//            LOGGER.log(Level.ERROR, e.message);
+        } catch (Exception e) {
+            // create a response string with stacktrace
+            String stackTrace = ExceptionUtils.getStackTrace(e);
+
+            String responseString = String.format("Internal server error: %s\n%s", e.toString(), stackTrace);
+            byte[] responseBytes = responseString.getBytes(StandardCharsets.UTF_8);
+            Headers headers = httpExchange.getResponseHeaders();
+            headers.set("Content-Type", "text/plain; charset=UTF-8");
 
             httpExchange.sendResponseHeaders(500, responseBytes.length);
             OutputStream outputStream = httpExchange.getResponseBody();
             outputStream.write(responseBytes);
             outputStream.close();
+
+            LOGGER.log(Level.ERROR, responseString);
+            throw e;
         }
     }
 

@@ -26,12 +26,6 @@ public class CommandHandler extends HandlerBase {
 
     @Override
     public void internalHandle(HttpExchange httpExchange) throws IOException {
-//            //debug
-//            Headers reqHeaders = httpExchange.getRequestHeaders();
-//            LOGGER.info("Request headers: ");
-//            for (Map.Entry<String, List<String>> entry : reqHeaders.entrySet()) {
-//                LOGGER.info(entry.getKey() + " " + entry.getValue().toString());
-//            }
 
         // execute command(s)
         InputStream bodyStream = httpExchange.getRequestBody();
@@ -57,26 +51,16 @@ public class CommandHandler extends HandlerBase {
             outputs.add(result);
         }
 
-        String responseString = String.join("\n", outputs);
-
         //headers
         Headers headers = httpExchange.getResponseHeaders();
         headers.add("Content-Type", "text/plain; charset=UTF-8");
 
         // body
+        String responseString = String.join("\n", outputs);
         byte[] responseBytes = responseString.getBytes(StandardCharsets.UTF_8);
         httpExchange.sendResponseHeaders(200, responseBytes.length);
         OutputStream outputStream = httpExchange.getResponseBody();
         outputStream.write(responseBytes);
         outputStream.close();
-
-        // debug info
-
-//            LOGGER.info("Response headers: ");
-//            for (Map.Entry<String, List<String>> entry : headers.entrySet()) {
-//                LOGGER.info(entry.getKey() + " " + entry.getValue().toString());
-//            }
-
-//            String response = block.getDefaultState().
     }
 }

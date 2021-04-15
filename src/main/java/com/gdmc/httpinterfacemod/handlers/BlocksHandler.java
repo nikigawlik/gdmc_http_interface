@@ -49,37 +49,30 @@ public class BlocksHandler extends HandlerBase {
 
     @Override
     public void internalHandle(HttpExchange httpExchange) throws IOException {
-        String method = httpExchange.getRequestMethod().toLowerCase();
-
-        // look at incoming request
-        Map<String, String> queryParams = parseQueryString(httpExchange.getRequestURI().getRawQuery());
-
-        String responseString = "";
-
-        int statusCode = 200;
 
         // query parameters
-        int x = 0;
-        int y = 0;
-        int z = 0;
-        boolean doBlockUpdates = true;
-        boolean spawnDrops = false;
-        int customFlags = -1; // -1 == no custom flags
-        boolean includeState = false;
+        Map<String, String> queryParams = parseQueryString(httpExchange.getRequestURI().getRawQuery());
+        int x;
+        int y;
+        int z;
+        boolean includeState;
+        boolean doBlockUpdates;
+        boolean spawnDrops;
+        int customFlags; // -1 == no custom flags
 
         try {
             x = Integer.parseInt(queryParams.getOrDefault("x", "0"));
             y = Integer.parseInt(queryParams.getOrDefault("y", "0"));
             z = Integer.parseInt(queryParams.getOrDefault("z", "0"));
 
-            includeState = Boolean.parseBoolean(queryParams.getOrDefault("includeState", Boolean.toString(includeState)));
+            includeState = Boolean.parseBoolean(queryParams.getOrDefault("includeState", "false"));
 
-            doBlockUpdates = Boolean.parseBoolean(queryParams.getOrDefault("doBlockUpdates", Boolean.toString(doBlockUpdates)));
-            spawnDrops = Boolean.parseBoolean(queryParams.getOrDefault("spawnDrops", Boolean.toString(spawnDrops)));
-            customFlags = Integer.parseInt(queryParams.getOrDefault("customFlags", Integer.toString(customFlags)), 2);
+            doBlockUpdates = Boolean.parseBoolean(queryParams.getOrDefault("doBlockUpdates", "true"));
+            spawnDrops = Boolean.parseBoolean(queryParams.getOrDefault("spawnDrops", "false"));
+            customFlags = Integer.parseInt(queryParams.getOrDefault("customFlags", "-1"), 2);
         } catch (NumberFormatException e) {
-            responseString = "Could not parse query parameter: " + e.getMessage();
-            statusCode = 400;
+            String message = "Could not parse query parameter: " + e.getMessage();
+            throw new HandlerBase.HttpException(message, 400);
         }
 
         // if content type is application/json use that otherwise return text
@@ -87,92 +80,88 @@ public class BlocksHandler extends HandlerBase {
         String contentType = getHeader(reqestHeaders, "Accept", "*/*");
         boolean returnJson = contentType.equals("application/json") || contentType.equals("text/json");
 
-        if(statusCode == 200) {
-            // construct response
-            if(method.equals("put")) {
-                InputStream bodyStream = httpExchange.getRequestBody();
-                List<String> body = new BufferedReader(new InputStreamReader(bodyStream))
-                        .lines().collect(Collectors.toList());
+        // construct response
+        String method = httpExchange.getRequestMethod().toLowerCase();
+        String responseString;
 
-                List<String> returnValues = new LinkedList<>();
+        if(method.equals("put")) {
+            InputStream bodyStream = httpExchange.getRequestBody();
+            List<String> body = new BufferedReader(new InputStreamReader(bodyStream))
+                    .lines().collect(Collectors.toList());
 
-                int blockFlags = customFlags >= 0? customFlags : getBlockFlags(doBlockUpdates, spawnDrops);
+            List<String> returnValues = new LinkedList<>();
 
-                for(String line : body) {
-                    String returnValue;
+            int blockFlags = customFlags >= 0? customFlags : getBlockFlags(doBlockUpdates, spawnDrops);
+
+            for(String line : body) {
+                String returnValue;
+                try {
+                    StringReader sr = new StringReader(line);
+                    ILocationArgument li = null;
                     try {
-                        StringReader sr = new StringReader(line);
-                        ILocationArgument li = null;
-                        try {
-                            li = BlockPosArgument.blockPos().parse(sr);
-                            sr.skip();
-                        } catch (CommandSyntaxException e) {
-                            sr = new StringReader(line); // TODO maybe delete this
-                        }
-                        BlockStateInput bsi = BlockStateArgument.blockState().parse(sr);
-
-                        CommandSource cs = cmdSrc.withPos(new Vector3d(x, y, z));
-
-                        int xx, yy, zz;
-                        if(li != null) {
-                            xx = (int)Math.round(li.getPosition(cs).x);
-                            yy = (int)Math.round(li.getPosition(cs).y);
-                            zz = (int)Math.round(li.getPosition(cs).z);
-                        } else {
-                            xx = x;
-                            yy = y;
-                            zz = z;
-                        }
-
-                        returnValue = setBlock(new BlockPos(xx, yy, zz), bsi, blockFlags) + "";
+                        li = BlockPosArgument.blockPos().parse(sr);
+                        sr.skip();
                     } catch (CommandSyntaxException e) {
-//                        // could be either from parsing or from placing
-//                        responseString = e.getMessage();
-//                        statusCode = 400;
-                        returnValue = e.getMessage();
+                        sr = new StringReader(line); // TODO maybe delete this
                     }
-                    returnValues.add(returnValue);
-                }
-                if(!returnJson) {
-                    responseString = String.join("\n", returnValues);
-                } else {
-                    JsonObject json = new JsonObject();
-                    JsonArray resultsArray = new JsonArray();
+                    BlockStateInput bsi = BlockStateArgument.blockState().parse(sr);
 
-                    for(String s : returnValues) {
-                        resultsArray.add(s);
+                    CommandSource cs = cmdSrc.withPos(new Vector3d(x, y, z));
+
+                    int xx, yy, zz;
+                    if(li != null) {
+                        xx = (int)Math.round(li.getPosition(cs).x);
+                        yy = (int)Math.round(li.getPosition(cs).y);
+                        zz = (int)Math.round(li.getPosition(cs).z);
+                    } else {
+                        xx = x;
+                        yy = y;
+                        zz = z;
                     }
 
-                    json.add("results", resultsArray);
-                    responseString = new Gson().toJson(json);
+                    returnValue = setBlock(new BlockPos(xx, yy, zz), bsi, blockFlags) + "";
+                } catch (CommandSyntaxException e) {
+                    returnValue = e.getMessage();
                 }
-            } else if(method.equals("get")) {
-                if(includeState) {
-                    responseString = getBlockWithState(new BlockPos(x, y, z), returnJson);
-                } else {
-                    responseString = getBlock(new BlockPos(x, y, z), returnJson) + "";
-                }
-            } else{
-                statusCode = 405;
-                responseString = "Method not allowed. Only PUT and GET requests are supported.";
+                returnValues.add(returnValue);
             }
+            if(!returnJson) {
+                responseString = String.join("\n", returnValues);
+            } else {
+                JsonObject json = new JsonObject();
+                JsonArray resultsArray = new JsonArray();
+
+                for(String s : returnValues) {
+                    resultsArray.add(s);
+                }
+
+                json.add("results", resultsArray);
+                responseString = new Gson().toJson(json);
+            }
+        } else if(method.equals("get")) {
+            if(includeState) {
+                responseString = getBlockWithState(new BlockPos(x, y, z), returnJson);
+            } else {
+                responseString = getBlock(new BlockPos(x, y, z), returnJson) + "";
+            }
+        } else{
+            throw new HandlerBase.HttpException("Method not allowed. Only PUT and GET requests are supported.", 405);
         }
 
         //headers
         Headers headers = httpExchange.getResponseHeaders();
-
         addDefaultHeaders(headers);
-        if(returnJson && statusCode < 400) {
+
+        if(returnJson) {
             headers.add("Content-Type", "application/json; charset=UTF-8");
         } else {
             headers.add("Content-Type", "text/plain; charset=UTF-8");
         }
 
         // body
-
         byte[] responseBytes = responseString.getBytes(StandardCharsets.UTF_8);
 
-        httpExchange.sendResponseHeaders(statusCode, responseBytes.length);
+        httpExchange.sendResponseHeaders(200, responseBytes.length);
         OutputStream outputStream = httpExchange.getResponseBody();
         outputStream.write(responseBytes);
         outputStream.close();

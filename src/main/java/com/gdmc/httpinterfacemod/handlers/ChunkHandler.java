@@ -16,6 +16,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 
 public class ChunkHandler extends HandlerBase {
     public ChunkHandler(MinecraftServer mcServer) {
@@ -24,78 +25,75 @@ public class ChunkHandler extends HandlerBase {
 
     @Override
     public void internalHandle(HttpExchange httpExchange) throws IOException {
+
+        // query parameters
+        Map<String, String> queryParams = parseQueryString(httpExchange.getRequestURI().getRawQuery());
+
+        int chunkX;
+        int chunkZ;
+        int chunkDX;
+        int chunkDZ;
+        try {
+            chunkX = Integer.parseInt(queryParams.getOrDefault("x", "0"));
+            chunkZ = Integer.parseInt(queryParams.getOrDefault("z", "0"));
+            chunkDX = Integer.parseInt(queryParams.getOrDefault("dx", "1"));
+            chunkDZ = Integer.parseInt(queryParams.getOrDefault("dz", "1"));
+        } catch (NumberFormatException e) {
+            String message = "Could not parse query parameter: " + e.getMessage();
+            throw new HandlerBase.HttpException(message, 400);
+        }
+
         String method = httpExchange.getRequestMethod().toLowerCase();
+        if(!method.equals("get")) {
+            throw new HandlerBase.HttpException("Method not allowed. Only GET requests are supported.", 405);
+        }
+
+        // with this header we return pure NBT binary
+        // if content type is application/json use that otherwise return text
+        Headers requestHeaders = httpExchange.getRequestHeaders();
+        String contentType = getHeader(requestHeaders, "Accept", "*/*");
+        boolean RETURN_TEXT = !contentType.equals("application/octet-stream");
+
+        // construct response
+        ServerWorld world = mcServer.getWorld(World.OVERWORLD);
+        assert world != null;
+
+//        CompletableFuture<ListNBT> cfs = CompletableFuture.supplyAsync(() -> {
+        ListNBT chunkList = new ListNBT();
+        for(int z = chunkZ; z < chunkZ + chunkDZ; z++)
+            for(int x = chunkX; x < chunkX + chunkDX; x++) {
+                Chunk chunk = world.getChunk(x, z);
+
+                CompoundNBT chunkNBT = ChunkSerializer.write(world, chunk);
+                chunkList.add(chunkNBT);
+            }
+//            return returnList;
+//        }, mcServer);
+
+        // block this thread until the above code has run on the main thread
+//        ListNBT chunkList = cfs.join();
+
+        CompoundNBT bodyNBT = new CompoundNBT();
+        bodyNBT.put("Chunks", chunkList);
+        bodyNBT.putInt("ChunkX", chunkX);
+        bodyNBT.putInt("ChunkZ", chunkZ);
+        bodyNBT.putInt("ChunkDX", chunkDX);
+        bodyNBT.putInt("ChunkDZ", chunkDZ);
 
         String responseString = "";
         byte[] responseBytes = new byte[0];
 
-        // look at incoming request
-        Map<String, String> queryParams = parseQueryString(httpExchange.getRequestURI().getRawQuery());
+        if(RETURN_TEXT) {
+            responseString = bodyNBT.toString();
+        } else {
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            DataOutputStream dos = new DataOutputStream(baos);
 
-        int statusCode = 200;
-
-        int chunkX = 0;
-        int chunkZ = 0;
-        int chunkDX = 1;
-        int chunkDZ = 1;
-        try {
-            chunkX = Integer.parseInt(queryParams.get("x"));
-            chunkZ = Integer.parseInt(queryParams.get("z"));
-            if(queryParams.containsKey("dx"))
-                chunkDX = Integer.parseInt(queryParams.get("dx"));
-            if(queryParams.containsKey("dz"))
-                chunkDZ = Integer.parseInt(queryParams.get("dz"));
-        } catch (NumberFormatException e) {
-            responseString = "Could not parse query parameter: " + e.getMessage();
-            statusCode = 400;
-        }
-
-        // with this header we return pure NBT binary
-
-        // if content type is application/json use that otherwise return text
-        Headers reqestHeaders = httpExchange.getRequestHeaders();
-        String contentType = getHeader(reqestHeaders, "Accept", "*/*");
-
-        boolean RETURN_TEXT = !contentType.equals("application/octet-stream");
-
-        // construct response
-        if(statusCode == 200) {
-            if(method.equals("get")) {
-                ServerWorld world = mcServer.getWorld(World.OVERWORLD);
-                assert world != null;
-
-                ListNBT chunkList = new ListNBT();
-                for(int z = chunkZ; z < chunkZ + chunkDZ; z++)
-                    for(int x = chunkX; x < chunkX + chunkDX; x++) {
-                        Chunk chunk = world.getChunk(x, z);
-
-                        CompoundNBT chunkNBT = ChunkSerializer.write(world, chunk);
-                        chunkList.add(chunkNBT);
-                    }
-
-                CompoundNBT bodyNBT = new CompoundNBT();
-                bodyNBT.put("Chunks", chunkList);
-                bodyNBT.putInt("ChunkX", chunkX);
-                bodyNBT.putInt("ChunkZ", chunkZ);
-                bodyNBT.putInt("ChunkDX", chunkDX);
-                bodyNBT.putInt("ChunkDZ", chunkDZ);
-
-                if(RETURN_TEXT) {
-                    responseString = bodyNBT.toString();
-                } else {
-                    ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                    DataOutputStream dos = new DataOutputStream(baos);
-
-                    CompoundNBT containterNBT = new CompoundNBT();
-                    containterNBT.put("file", bodyNBT);
-                    containterNBT.write(dos);
-                    dos.flush();
-                    responseBytes = baos.toByteArray();
-                }
-            } else {
-                statusCode = 405;
-                responseString = "Method not allowed. Only GET requests are supported.";
-            }
+            CompoundNBT containterNBT = new CompoundNBT();
+            containterNBT.put("file", bodyNBT);
+            containterNBT.write(dos);
+            dos.flush();
+            responseBytes = baos.toByteArray();
         }
 
         //headers
@@ -110,7 +108,7 @@ public class ChunkHandler extends HandlerBase {
         if(RETURN_TEXT) {
             responseBytes = responseString.getBytes(StandardCharsets.UTF_8);
         }
-        httpExchange.sendResponseHeaders(statusCode, responseBytes.length);
+        httpExchange.sendResponseHeaders(200, responseBytes.length);
         OutputStream outputStream = httpExchange.getResponseBody();
         outputStream.write(responseBytes);
         outputStream.close();
