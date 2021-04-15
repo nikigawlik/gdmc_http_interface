@@ -58,20 +58,20 @@ public class ChunkHandler extends HandlerBase {
         ServerWorld world = mcServer.getWorld(World.OVERWORLD);
         assert world != null;
 
-//        CompletableFuture<ListNBT> cfs = CompletableFuture.supplyAsync(() -> {
-        ListNBT chunkList = new ListNBT();
-        for(int z = chunkZ; z < chunkZ + chunkDZ; z++)
-            for(int x = chunkX; x < chunkX + chunkDX; x++) {
-                Chunk chunk = world.getChunk(x, z);
+        CompletableFuture<ListNBT> cfs = CompletableFuture.supplyAsync(() -> {
+            ListNBT returnList = new ListNBT();
+            for(int z = chunkZ; z < chunkZ + chunkDZ; z++)
+                for(int x = chunkX; x < chunkX + chunkDX; x++) {
+                    Chunk chunk = world.getChunk(x, z);
 
-                CompoundNBT chunkNBT = ChunkSerializer.write(world, chunk);
-                chunkList.add(chunkNBT);
-            }
-//            return returnList;
-//        }, mcServer);
+                    CompoundNBT chunkNBT = ChunkSerializer.write(world, chunk);
+                    returnList.add(chunkNBT);
+                }
+            return returnList;
+        }, mcServer);
 
         // block this thread until the above code has run on the main thread
-//        ListNBT chunkList = cfs.join();
+        ListNBT chunkList = cfs.join();
 
         CompoundNBT bodyNBT = new CompoundNBT();
         bodyNBT.put("Chunks", chunkList);
