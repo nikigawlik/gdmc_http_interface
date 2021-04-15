@@ -74,10 +74,6 @@ public class BuildAreaHandler extends HandlerBase {
         Headers headers = httpExchange.getResponseHeaders();
         headers.add("Content-Type", "application/json; charset=UTF-8");
 
-        byte[] responseBytes = responseString.getBytes(StandardCharsets.UTF_8);
-        httpExchange.sendResponseHeaders(200, responseBytes.length);
-        OutputStream outputStream = httpExchange.getResponseBody();
-        outputStream.write(responseBytes);
-        outputStream.close();
+        resolveRequest(httpExchange, responseString);
     }
 }

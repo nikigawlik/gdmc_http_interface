@@ -158,13 +158,7 @@ public class BlocksHandler extends HandlerBase {
             headers.add("Content-Type", "text/plain; charset=UTF-8");
         }
 
-        // body
-        byte[] responseBytes = responseString.getBytes(StandardCharsets.UTF_8);
-
-        httpExchange.sendResponseHeaders(200, responseBytes.length);
-        OutputStream outputStream = httpExchange.getResponseBody();
-        outputStream.write(responseBytes);
-        outputStream.close();
+        resolveRequest(httpExchange, responseString);
     }
 
     private int setBlock(BlockPos pos, BlockStateInput state, int flags) {

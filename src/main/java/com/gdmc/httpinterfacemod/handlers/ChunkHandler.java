@@ -80,12 +80,16 @@ public class ChunkHandler extends HandlerBase {
         bodyNBT.putInt("ChunkDX", chunkDX);
         bodyNBT.putInt("ChunkDZ", chunkDZ);
 
-        String responseString = "";
-        byte[] responseBytes = new byte[0];
+        // headers and body
+        Headers headers = httpExchange.getResponseHeaders();
 
         if(RETURN_TEXT) {
-            responseString = bodyNBT.toString();
+            headers.add("Content-Type", "text/plain; charset=UTF-8");
+            String responseString = bodyNBT.toString();
+
+            resolveRequest(httpExchange, responseString);
         } else {
+            headers.add("Content-Type", "application/octet-stream");
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             DataOutputStream dos = new DataOutputStream(baos);
 
@@ -93,24 +97,9 @@ public class ChunkHandler extends HandlerBase {
             containterNBT.put("file", bodyNBT);
             containterNBT.write(dos);
             dos.flush();
-            responseBytes = baos.toByteArray();
-        }
+            byte[] responseBytes = baos.toByteArray();
 
-        //headers
-        Headers headers = httpExchange.getResponseHeaders();
-        if(RETURN_TEXT) {
-            headers.add("Content-Type", "text/plain; charset=UTF-8");
-        } else {
-            headers.add("Content-Type", "application/octet-stream");
+            resolveRequest(httpExchange, responseBytes);
         }
-
-        // body
-        if(RETURN_TEXT) {
-            responseBytes = responseString.getBytes(StandardCharsets.UTF_8);
-        }
-        httpExchange.sendResponseHeaders(200, responseBytes.length);
-        OutputStream outputStream = httpExchange.getResponseBody();
-        outputStream.write(responseBytes);
-        outputStream.close();
     }
 }

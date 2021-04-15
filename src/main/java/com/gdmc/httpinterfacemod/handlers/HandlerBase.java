@@ -81,6 +81,18 @@ public abstract class HandlerBase implements HttpHandler {
         headers.add("Content-Disposition", "inline");
     }
 
+    protected static void resolveRequest(HttpExchange httpExchange, String responseString) throws IOException {
+        byte[] responseBytes = responseString.getBytes(StandardCharsets.UTF_8);
+        resolveRequest(httpExchange, responseBytes);
+    }
+
+    protected static void resolveRequest(HttpExchange httpExchange, byte[] responseBytes) throws IOException {
+        httpExchange.sendResponseHeaders(200, responseBytes.length);
+        OutputStream outputStream = httpExchange.getResponseBody();
+        outputStream.write(responseBytes);
+        outputStream.close();
+    }
+
     protected static String getHeader(Headers headers, String key, String defaultValue) {
         List<String> list = headers.get(key);
         if(list == null || list.size() == 0)

@@ -57,10 +57,6 @@ public class CommandHandler extends HandlerBase {
 
         // body
         String responseString = String.join("\n", outputs);
-        byte[] responseBytes = responseString.getBytes(StandardCharsets.UTF_8);
-        httpExchange.sendResponseHeaders(200, responseBytes.length);
-        OutputStream outputStream = httpExchange.getResponseBody();
-        outputStream.write(responseBytes);
-        outputStream.close();
+        resolveRequest(httpExchange, responseString);
     }
 }
