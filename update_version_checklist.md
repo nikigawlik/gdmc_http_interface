@@ -68,6 +68,8 @@ Try out the published jar in the mod launcher
 
 ### merge / push
 
+commit changes.
+
 merge into master, push to master and make a release on github.
 
 Paste / write changelog
