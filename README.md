@@ -1,12 +1,12 @@
-# Minecraft HTTP Interface Mod (Minecraft 1.16.5)
+# This project has moved somewhere else!
+
+Development has kindly been picked up by Niels-NTG and the project now lives [over here](https://github.com/Niels-NTG/gdmc_http_interface).
+
+## Minecraft HTTP Interface Mod (Minecraft 1.16.5)
 
 This repo is based on the [GDMC example mod](https://github.com/Lasbleic/gdmc_java_mod) which is based on the Forge MDK.
 
-The latest release is [0.4.1 for Minecraft version 1.16.5](https://github.com/nilsgawlik/gdmc_http_interface/releases/tag/v0.4.1)
-
 ## What it's all about
-
-(Disclaimer: This mod is in active development, and things might still change)
 
 This mod opens an HTTP interface so that other programs (on the same machine) can read and modify the world. It is meant as a tool to be used for the [Generative Design in Minecraft Competition](http://gendesignmc.engineering.nyu.edu/).
 
